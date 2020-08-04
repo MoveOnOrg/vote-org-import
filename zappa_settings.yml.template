@@ -1,0 +1,20 @@
+---
+prod:
+  apigateway_enabled: false
+  aws_region: [your-region-here]
+  events:
+    - function: import_new_files.aws_lambda
+      expression: rate(2 hours)
+  keep_warm: false
+  lambda_handler: import_new_files.aws_lambda
+  memory_size: 512
+  project_name: vote-org-import
+  role_name: [your-role-name-here]
+  runtime: python3.6
+  s3_bucket: [your-s3-bucket-here]
+  timeout_seconds: 300
+  vpc_config:
+      SubnetIds:
+        - [your-subnet-ids-here]
+      SecurityGroupIds:
+        - [your-security-group-ids-here]
