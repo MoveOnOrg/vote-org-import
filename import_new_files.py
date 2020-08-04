@@ -15,7 +15,8 @@ ARG_DEFINITIONS = {
     'DB_USER': 'Database user.',
     'DB_PASS': 'Database password.',
     'DB_NAME': 'Database name.',
-
+    'DB_TABLE': 'Table to save data to.',
+    'LAST_RUN_SCRIPT': 'Name of the last run time entry.'
 }
 
 REQUIRED_ARGS = [
@@ -36,30 +37,34 @@ def import_new_files(args):
     args.NO_RESULTS = True
     if len(files):
         for file in files:
-            args.DB_QUERY = """
-            COPY tao.vote_dot_org_events
-            FROM 's3://%s/%s/%s'
-            region AS '%s'
+            args.DB_QUERY = f"""
+            COPY {args.DB_TABLE}
+            FROM %s
+            region AS %s
             csv acceptinvchars
-            access_key_id '%s'
-            secret_access_key '%s';
-            """ % (
-                args.S3_BUCKET,
-                file[0],
-                file[1],
+            access_key_id %s
+            secret_access_key %s;
+            """
+            s3_path = f"s3://{args.S3_BUCKET}/{file[0]}/{file[1]}"
+            args.DB_VALUES = (
+                s3_path,
                 args.S3_BUCKET_REGION,
                 args.AWS_ACCESS_KEY,
                 args.AWS_SECRET_KEY
             )
-            print('importing %s/%s ...' % (file[0], file[1]))
+            print(f"importing {s3_path}")
             get_psql_results(args)
         new_last_run_parts = files[-1][0].split('-')
         new_last_run = '%s %s' % ('-'.join(new_last_run_parts[0:3]), ':'.join(new_last_run_parts[3:6]))
         args.DB_QUERY = """
         UPDATE tech.script_last_run
-        SET last_run = '%s'
-        WHERE script = 'vote-org-import'
-        """ % new_last_run
+        SET last_run = %s
+        WHERE script = %s
+        """
+        args.DB_VALUES = (
+            new_last_run,
+            args.LAST_RUN_SCRIPT
+        )
         get_psql_results(args)
     else:
         new_last_run = last_run.strftime('%Y-%m-%d %H:%M:00')
