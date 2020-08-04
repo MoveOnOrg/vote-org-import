@@ -28,8 +28,11 @@ def import_new_files(args):
     args.DB_QUERY = """
     SELECT last_run
     FROM tech.script_last_run
-    WHERE script = 'vote-org-import'
+    WHERE script = %s
     """
+    args.DB_VALUES = (
+        args.LAST_RUN_SCRIPT,
+    )
     last_run = get_psql_results(args)[0].get('last_run')
     last_run_file = last_run.strftime('%Y-%m-%d-%H-%M-00')
     files = [file.split('/') for file in s3_file_list(args) if file.split('/')[0] > last_run_file]
