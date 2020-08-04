@@ -34,7 +34,7 @@ def import_new_files(args):
         args.LAST_RUN_SCRIPT,
     )
     last_run = get_psql_results(args)[0].get('last_run')
-    last_run_file = last_run.strftime('%Y-%m-%d-%H-%M-00')
+    last_run_file = last_run.strftime('%Y-%m-%d-%H-%M-%S')
     files = [file.split('/') for file in s3_file_list(args) if file.split('/')[0] > last_run_file]
     files.sort(key=lambda file:file[0])
     args.NO_RESULTS = True
@@ -70,7 +70,7 @@ def import_new_files(args):
         )
         get_psql_results(args)
     else:
-        new_last_run = last_run.strftime('%Y-%m-%d %H:%M:00')
+        new_last_run = last_run.strftime('%Y-%m-%d %H:%M:%S')
     return {'imports': len(files), 'last': new_last_run}
 
 
