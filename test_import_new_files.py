@@ -36,6 +36,8 @@ class Test():
             'DB_USER': 'mock',
             'DB_PASS': 'mock',
             'DB_NAME': 'mock',
+            'DB_TABLE': 'mock',
+            'LAST_RUN_SCRIPT': '2020-02-01-01 00:00:00'
         }
         args = Struct(**args)
         # Nothing new to import.
