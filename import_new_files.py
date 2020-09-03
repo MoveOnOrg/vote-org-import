@@ -57,18 +57,19 @@ def import_new_files(args):
             )
             print(f"importing {s3_path}")
             get_psql_results(args)
-        new_last_run_parts = files[-1][0].split('-')
-        new_last_run = '%s %s' % ('-'.join(new_last_run_parts[0:3]), ':'.join(new_last_run_parts[3:6]))
-        args.DB_QUERY = """
-        UPDATE tech.script_last_run
-        SET last_run = %s
-        WHERE script = %s
-        """
-        args.DB_VALUES = (
-            new_last_run,
-            args.LAST_RUN_SCRIPT
-        )
-        get_psql_results(args)
+            # Update last_run after every file load
+            new_last_run_parts = file[0].split('-')
+            new_last_run = '%s %s' % ('-'.join(new_last_run_parts[0:3]), ':'.join(new_last_run_parts[3:6]))
+            args.DB_QUERY = """
+            UPDATE tech.script_last_run
+            SET last_run = %s
+            WHERE script = %s
+            """
+            args.DB_VALUES = (
+                new_last_run,
+                args.LAST_RUN_SCRIPT
+            )
+            get_psql_results(args)
     else:
         new_last_run = last_run.strftime('%Y-%m-%d %H:%M:%S')
     return {'imports': len(files), 'last': new_last_run}
