@@ -35,10 +35,12 @@ def import_new_files(args):
     )
     last_run = get_psql_results(args)[0].get('last_run')
     last_run_file = last_run.strftime('%Y-%m-%d-%H-%M-%S')
+    print(f"Last run file: {last_run_file}")
     files = [file.split('/') for file in s3_file_list(args) if file.split('/')[0] > last_run_file]
     files.sort(key=lambda file:file[0])
     args.NO_RESULTS = True
     if len(files):
+        print("Found one or more files; importing")
         for file in files:
             args.DB_QUERY = f"""
             COPY {args.DB_TABLE}
@@ -71,6 +73,7 @@ def import_new_files(args):
             )
             get_psql_results(args)
     else:
+        print(f"No new files to import")
         new_last_run = last_run.strftime('%Y-%m-%d %H:%M:%S')
     return {'imports': len(files), 'last': new_last_run}
 

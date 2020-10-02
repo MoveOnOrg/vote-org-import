@@ -20,6 +20,14 @@ def s3_file_list(args) -> list:
     )
     object_list = s3_client.list_objects(Bucket=args.S3_BUCKET)
     file_list = [file.get('Key') for file in object_list.get('Contents', [])]
+    # We get at most 1000 results at a time
+    while len(object_list.get('Contents', []))==1000:
+        print("Over 1000 found, getting next 1000")
+        marker = object_list['Contents'][999].get('Key')
+        print(f"Marker: {marker}")
+        object_list = s3_client.list_objects(Bucket=args.S3_BUCKET, Marker=marker)
+        print(f"Found {len(object_list)} more objects")
+        file_list = file_list + [file.get('Key') for file in object_list.get('Contents', [])]
     return file_list
 
 
